@@ -1,6 +1,7 @@
-oi
-xau
-oiiii
-
-
-
+RQ P0 10 A
+RQ P1 20 B
+RQ P2 30 C
+C
+STAT
+RL
+X
