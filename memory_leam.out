@@ -1,0 +1,9 @@
+Total Memory 50
+Allocate 5 to P0 with Best fit
+Allocate 10 to P1 with Best fit
+Allocate 15 to P2 with Best fit
+Addresses [0:4] P0
+Addresses [5:14] P1
+Addresses [15:29] P2
+Addresses [30:49] Unused
+Exit
