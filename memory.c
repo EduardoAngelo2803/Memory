@@ -31,6 +31,7 @@ typedef struct {
 } Process;
 
 Process list[SIZE];
+
 AlocMemory allocation[SIZE];
 
 void firstFit () {
@@ -50,7 +51,7 @@ void firstFit () {
 
         for (int i = 0; i < tamTotal; i++) {
            
-            if (allocation[i].num == -1) {
+            if (allocation[i].num == 9999) {
 
                 strcpy(allocation[i].name, "Unused");
             }
@@ -102,12 +103,12 @@ void release () {
     
     for (int i = 0; i < tamTotal; i++) {
 
-        if(allocation[i].num != -1) {
+        if(allocation[i].num != 9999) {
 
             if (strcmp(allocation[i].name, auxRelase[countTake]) == 0) {
 
                 strcpy(allocation[i].name, "Unused");
-                allocation[i].num = -1;
+                allocation[i].num = 9999;
             }
         }
 
@@ -128,7 +129,7 @@ void stat () {
     int auxi = 0;
     while (i < tamTotal) {
 
-        if(allocation[i].num != -1) {
+        if(allocation[i].num != 9999) {
 
             //Lock 'Mutex'
             for (j = 0; j < countProcess; j++) {
@@ -150,7 +151,7 @@ void stat () {
         } else {
 
             auxUnused = i;
-            while (allocation[i].num == -1) {
+            while (allocation[i].num == 9999) {
                 auxUnused++;
                 i++;
                 auxi = i - 1;
@@ -167,6 +168,32 @@ void compact () {
     int aux;
     int flag = 0;
     int aux2;
+
+
+    int i, j, auxNum, auxDur, auxWait, auxexComp, auxlostDead, auxKilled, auxFlagKill;
+    char auxName[SIZE];
+
+    for (i = 1; i < tamTotal; i++) {
+
+        auxNum = allocation[i].num;
+        
+        strcpy(auxName, allocation[i].name);
+
+        for (j = i - 1; j >= 0 && auxNum < allocation[j].num; j--)
+        {
+
+            allocation[j + 1].num = allocation[j].num;
+            strcpy(allocation[j + 1].name, allocation[j].name);
+        }
+
+        allocation[j+1].num = auxNum;
+        strcpy(allocation[j + 1].name, auxName);
+       
+    }
+
+
+
+    /*
     for (int i = 0; i < tamTotal; i++) {   
 
         if(flag == 1 && allocation[i].num != -1) {
@@ -186,7 +213,7 @@ void compact () {
                 i++;
             }
         }
-    }
+    }*/
     fprintf(f, "Compact Memory\n");
 }
 
@@ -242,7 +269,7 @@ void initVetor() {
     for (int i = 0; i < tamTotal; i++)
     {
 
-        allocation[i].num = -1;
+        allocation[i].num = 9999;
     }
 }
 int main (int argc, char* argv[]) {
