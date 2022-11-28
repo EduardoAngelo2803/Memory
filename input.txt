@@ -6,4 +6,7 @@ RL P1
 STAT
 C
 STAT
+RL P1
+RL P0
+STAT
 X

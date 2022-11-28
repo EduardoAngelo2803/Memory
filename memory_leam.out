@@ -15,4 +15,10 @@ Compact Memory
 Addresses [0:4] P0
 Addresses [5:19] P2
 Addresses [20:49] Unused
+Fail to release P1
+Release P0
+Addresses [0:4] Unused
+Addresses [5:4] Unused
+Addresses [5:19] P2
+Addresses [20:49] Unused
 Exit

@@ -101,22 +101,50 @@ void request () {
 
 void release () {
     
+    int flagNoExist = 0;
+
+    for(int i = 0; i < countProcess; i++) {
+       
+        //Contando se o processo solicitado para release existe, na lista de processos, caso sim, acrescenta na flag, para depois verificar se existe algum ou não
+        if(strcmp(list[i].name, auxRelase[countTake]) != 0) {
+
+            flagNoExist++;
+        }
+    }
+
+    if(flagNoExist >= countProcess) {
+       
+        fprintf(f, "Fail to release %s\n", auxRelase[countTake]);
+
+    }else {
+       // printf("%d", flagNoExist);
+        fprintf(f, "Release %s\n", auxRelase[countTake]);
+        //countProcess--;
+    }
+
+
     for (int i = 0; i < tamTotal; i++) {
 
         if(allocation[i].num != 9999) {
 
             if (strcmp(allocation[i].name, auxRelase[countTake]) == 0) {
-
+               
                 strcpy(allocation[i].name, "Unused");
                 allocation[i].num = 9999;
             }
         }
+    }     
 
-    } for (int i = 0; i < tamTotal; i++) {
+    for(int i = 0; i < countProcess; i++) {
 
-        //printf("%d %s\n", allocation[i].num, allocation[i].name);
+         //Limpando o processo que sofreu release da lista de processos
+        if(strcmp(list[i].name, auxRelase[countTake]) == 0) {
+
+            list[i].name[0] = '\0';
+            list[i].strategy[0] = '\0';
+            list[i].memory = 0;
+        }
     }
-        fprintf(f, "Release %s\n", auxRelase[countTake]);
 }
 
 void stat () {
@@ -127,10 +155,10 @@ void stat () {
     int i = 0;
     int j = 0;
     int auxi = 0;
+
     while (i < tamTotal) {
 
         if(allocation[i].num != 9999) {
-
             //Lock 'Mutex'
             for (j = 0; j < countProcess; j++) {
 
@@ -144,7 +172,7 @@ void stat () {
                     break;
                 }
             }
-
+        
             fprintf(f, "Addresses [%d:%d] %s\n", aux, auxi, allocation[auxi].name);
             aux = i;
   
@@ -230,7 +258,8 @@ void runMemory () {
     while (shouldrun == 1) {
 
         if(strcmp(takeInput[countTake], "X") == 0) {
-            fprintf(f, "Exit\n");
+            
+            fprintf(f, "Exit");
             exit(EXIT_SUCCESS);
         }
 
@@ -318,6 +347,7 @@ int main (int argc, char* argv[]) {
     fprintf(f, "Total Memory %d\n", tamTotal);
     initVetor();
     runMemory();
+    
 
     return 0;
 }
