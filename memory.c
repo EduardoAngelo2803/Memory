@@ -12,6 +12,7 @@ int countRequest = 0;
 int countProcess = 0;
 int tamTotal;
 int flagCountProcess;
+int countFirst = 0;
 
 FILE *f;
 
@@ -37,26 +38,24 @@ AlocMemory allocation[SIZE];
 
 void firstFit () {
 
-    int countFirst = 0;
+    
+    int auxCount = 0;
 
-        for (int j = 0; j < countProcess; j++) {
+      for (int i = 0; i < tamTotal; i++) {
 
-            for (int i = 0; i < list[j].memory; i++) {
-
-                allocation[countFirst].num = countFirst + 1;
-                strcpy(allocation[countFirst].name, list[j].name);
+            if(allocation[i].num == 9999 && auxCount < list[countRequest].memory) {
+                //countFirst = verProcessNum(i);
+                allocation[i].num = countFirst + 1;
+                strcpy(allocation[i].name, list[countRequest].name);
                 countFirst++;
-               
-            }
-        }
+                auxCount++;
+            }              
+        }       
+    for(int i = 0; i < tamTotal; i++) {
 
-        for (int i = 0; i < tamTotal; i++) {
-           
-            if (allocation[i].num == 9999) {
+        printf("%s = %d\n", allocation[i].name, allocation[i].num);
 
-                strcpy(allocation[i].name, "Unused");
-            }
-        }        
+    } 
 }
 
 void bestFit () {
@@ -182,11 +181,21 @@ void release () {
 }
 
 int verProcessName (int i) {
-
-    
+   
     for(int j = 0; j < countProcess; j++) {
 
         if(strcmp(allocation[i].name, list[j].name) == 0) {
+            
+            return j;
+        }
+    }
+}
+
+int verProcessNum (int i) {
+
+    for(int j = 0; j < countProcess; j++) {
+
+        if(allocation[j].num == allocation[i].num) {
             
             return j;
         }
