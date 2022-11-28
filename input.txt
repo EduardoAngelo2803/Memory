@@ -4,4 +4,6 @@ RQ P2 15 B
 STAT
 RL P1
 STAT
+C
+STAT
 X

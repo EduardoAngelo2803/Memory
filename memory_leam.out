@@ -9,7 +9,10 @@ Addresses [30:49] Unused
 Release P1
 Addresses [0:4] P0
 Addresses [5:14] Unused
-Addresses [15:14] Unused
 Addresses [15:29] P2
+Addresses [30:49] Unused
+Compact Memory
+Addresses [0:4] P0
+Addresses [5:29] P2
 Addresses [30:49] Unused
 Exit

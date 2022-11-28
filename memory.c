@@ -37,11 +37,9 @@ void firstFit () {
 
     int countFirst = 0;
 
-        for (int j = 0; j < countProcess; j++)
-        {
+        for (int j = 0; j < countProcess; j++) {
 
-            for (int i = 0; i < list[j].memory; i++)
-            {
+            for (int i = 0; i < list[j].memory; i++) {
 
                 allocation[countFirst].num = countFirst + 1;
                 strcpy(allocation[countFirst].name, list[j].name);
@@ -50,11 +48,9 @@ void firstFit () {
             }
         }
 
-        for (int i = 0; i < tamTotal; i++)
-        {
+        for (int i = 0; i < tamTotal; i++) {
            
-            if (allocation[i].num == -1)
-            {
+            if (allocation[i].num == -1) {
 
                 strcpy(allocation[i].name, "Unused");
             }
@@ -104,8 +100,7 @@ void request () {
 
 void release () {
     
-    for (int i = 0; i < tamTotal; i++)
-    {
+    for (int i = 0; i < tamTotal; i++) {
 
         if(allocation[i].num != -1) {
 
@@ -115,10 +110,10 @@ void release () {
                 allocation[i].num = -1;
             }
         }
-    }
-    for (int i = 0; i < tamTotal; i++) {
 
-        printf("%d %s\n", allocation[i].num, allocation[i].name);
+    } for (int i = 0; i < tamTotal; i++) {
+
+        //printf("%d %s\n", allocation[i].num, allocation[i].name);
     }
         fprintf(f, "Release %s\n", auxRelase[countTake]);
 }
@@ -130,29 +125,35 @@ void stat () {
     int flag = 0;
     int i = 0;
     int j = 0;
-    
+    int auxi = 0;
     while (i < tamTotal) {
 
         if(allocation[i].num != -1) {
 
             //Lock 'Mutex'
-            while (strcmp(allocation[i].name, list[j].name) == 0) {
-                
-                i++;
-            }
-            
-            printf("%d", i);
-            fprintf(f, "Addresses [%d:%d] %s\n", aux, i - 1, allocation[i - 1].name);
-            aux = i;
-            
-            j++;
+            for (j = 0; j < countProcess; j++) {
 
+                while (strcmp(allocation[i].name, list[j].name) == 0) {
+                    
+                    i++;
+                    auxi = i - 1;
+                    flag = 1;
+                }
+                if(flag == 1) {
+                    break;
+                }
+            }
+
+            fprintf(f, "Addresses [%d:%d] %s\n", aux, auxi, allocation[auxi].name);
+            aux = i;
+  
         } else {
 
             auxUnused = i;
             while (allocation[i].num == -1) {
                 auxUnused++;
                 i++;
+                auxi = i - 1;
             }
             fprintf(f, "Addresses [%d:%d] Unused\n", aux, auxUnused - 1);
             aux = i;           
@@ -163,8 +164,31 @@ void stat () {
 
 void compact () {
 
+    int aux;
+    int flag = 0;
+    int aux2;
+    for (int i = 0; i < tamTotal; i++) {   
 
-} 
+        if(flag == 1 && allocation[i].num != -1) {
+
+            for (int j = aux; j < i; j++) {
+
+                allocation[j].num = j;
+                strcpy(allocation[j].name, allocation[i].name);
+            }
+        }
+
+        if (allocation[i].num == -1) {
+
+            aux = i;
+            while (allocation[i].num == -1) {
+
+                i++;
+            }
+        }
+    }
+    fprintf(f, "Compact Memory\n");
+}
 
 void end () {
 
@@ -187,27 +211,28 @@ void runMemory () {
         auxTake[countTake] = ptr;      
 
         if(strcmp(auxTake[countTake], "RQ") == 0) {
-            countProcess++;
-            
+
+            countProcess++;            
             request();
+
         } else if (strcmp(auxTake[countTake], "RL") == 0) {
             
-            while (ptr != NULL)
-            {
+            while (ptr != NULL) {
                 
                 auxRelase[countTake] = ptr;
                 ptr = strtok(NULL, " ");
                
             }
             release();
+
         } else if (strcmp(auxTake[countTake], "STAT") == 0) {
             
             stat();
+
         } else if (strcmp(auxTake[countTake], "C") == 0) {
             
             compact();
         }
-
         countTake++;
     }
 }
