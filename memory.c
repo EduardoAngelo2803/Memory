@@ -11,6 +11,7 @@ int countTake = 0;
 int countRequest = 0;
 int countProcess = 0;
 int tamTotal;
+int flagCountProcess;
 
 FILE *f;
 
@@ -74,26 +75,59 @@ void worstFit () {
 void request () {
 
     char aux[2];
-    sscanf(vetorMemory[countRequest], "%s%s%d%s", aux, list[countRequest].name, &list[countRequest].memory, list[countRequest].strategy);
-   
+    sscanf(vetorMemory[countTake], "%s%s%d%s", aux, list[countRequest].name, &list[countRequest].memory, list[countRequest].strategy);
+    
     memset(aux, 0, sizeof(char) * 2);
 
     if(strcmp(list[countRequest].strategy, "F") == 0) {
+        
+        if(list[countRequest].memory < tamTotal) {
 
-        fprintf(f, "Allocate %d to %s with First fit\n", list[countRequest].memory, list[countRequest].name);
-        firstFit();
+            fprintf(f, "Allocate %d to %s with First fit\n", list[countRequest].memory, list[countRequest].name);
+            firstFit();
+        }else {
+
+            fprintf(f, "The request of %s fail\n", list[countRequest].name);
+            list[countRequest].name[0] = '\0';
+            list[countRequest].memory = 0;
+            list[countRequest].strategy[0] = '\0';
+            flagCountProcess = 1;
+
+        }
     }
     else if (strcmp(list[countRequest].strategy, "B") == 0)
     {
 
-        fprintf(f, "Allocate %d to %s with Best fit\n", list[countRequest].memory, list[countRequest].name);
-        firstFit();
+       if(list[countRequest].memory < tamTotal) {
+
+            fprintf(f, "Allocate %d to %s with First fit\n", list[countRequest].memory, list[countRequest].name);
+            firstFit();
+        }else {
+
+            fprintf(f, "The request of %s fail\n", list[countRequest].name);
+            list[countRequest].name[0] = '\0';
+            list[countRequest].memory = 0;
+            list[countRequest].strategy[0] = '\0';
+            flagCountProcess  = 1;
+
+        }
     }
     else if (strcmp(list[countRequest].strategy, "W") == 0)
     {
 
-        fprintf(f, "Allocate %d to %s with Worst fit\n", list[countRequest].memory, list[countRequest].name);
-        worstFit();
+        if(list[countRequest].memory < tamTotal) {
+
+            fprintf(f, "Allocate %d to %s with First fit\n", list[countRequest].memory, list[countRequest].name);
+            firstFit();
+        }else {
+
+            fprintf(f, "The request of %s fail\n", list[countRequest].name);
+            list[countRequest].name[0] = '\0';
+            list[countRequest].memory = 0;
+            list[countRequest].strategy[0] = '\0';
+            flagCountProcess = 1;
+
+        }
     }
 
     countRequest++;
@@ -147,6 +181,19 @@ void release () {
     }
 }
 
+int verProcessName (int i) {
+
+    
+    for(int j = 0; j < countProcess; j++) {
+
+        if(strcmp(allocation[i].name, list[j].name) == 0) {
+            
+            return j;
+        }
+    }
+
+}
+
 void stat () {
    
     int aux = 0;
@@ -155,26 +202,24 @@ void stat () {
     int i = 0;
     int j = 0;
     int auxi = 0;
+    int auxProcessName;
 
     while (i < tamTotal) {
 
         if(allocation[i].num != 9999) {
             //Lock 'Mutex'
-            for (j = 0; j < countProcess; j++) {
-
-                while (strcmp(allocation[i].name, list[j].name) == 0) {
-                    
-                    i++;
-                    auxi = i - 1;
-                    flag = 1;
-                }
-                if(flag == 1) {
-                    break;
-                }
+            auxProcessName = verProcessName(i);
+            
+            while (strcmp(allocation[i].name, list[auxProcessName].name) == 0) {
+                
+                i++;
+                auxi = i - 1;
+               
             }
-        
+
             fprintf(f, "Addresses [%d:%d] %s\n", aux, auxi, allocation[auxi].name);
             aux = i;
+            
   
         } else {
 
@@ -267,7 +312,8 @@ void runMemory () {
         auxTake[countTake] = ptr;      
 
         if(strcmp(auxTake[countTake], "RQ") == 0) {
-
+            //Modificar
+            
             countProcess++;            
             request();
 
@@ -339,9 +385,11 @@ int main (int argc, char* argv[]) {
     }
     for (int i = 0; i < r - 1; i++) {
 
+        
         vetorMemory[i] =  strdup(takeInput[i]);
         
     }
+
         fclose(file);
 
     fprintf(f, "Total Memory %d\n", tamTotal);
