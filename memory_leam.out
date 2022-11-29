@@ -1,37 +1,26 @@
-Total Memory 80
-Allocate 5 to P0 with First fit
-Allocate 10 to P1 with First fit
-Allocate 15 to P2 with First fit
-Allocate 50 to P3 with First fit
+Total Memory 50
+Allocate 5 to P0 with Best fit
+Allocate 10 to P1 with Best fit
+Allocate 15 to P2 with Best fit
 Addresses [0:4] P0
 Addresses [5:14] P1
 Addresses [15:29] P2
-Addresses [30:79] P3
+Addresses [30:49] Unused
 Release P1
 Addresses [0:4] P0
 Addresses [5:14] Unused
 Addresses [15:29] P2
-Addresses [30:79] P3
+Addresses [30:49] Unused
+Allocate 5 to P0 with Best fit
+Addresses [0:9] P0
+Addresses [10:14] Unused
+Addresses [15:29] P2
+Addresses [30:49] Unused
 Compact Memory
 Addresses [0:4] P0
 Addresses [5:19] P2
-Addresses [20:69] P3
-Addresses [70:79] Unused
+Addresses [20:24] P0
+Addresses [25:49] Unused
 Fail to release P1
-Release P0
-Addresses [0:4] Unused
-Addresses [5:19] P2
-Addresses [20:69] P3
-Addresses [70:79] Unused
-Fail to release P0
-Release P2
-Addresses [0:19] Unused
-Addresses [20:69] P3
-Addresses [70:79] Unused
-Fail to release P2
-Allocate 5 to P0 with First fit
-Addresses [0:4] P0
-Addresses [5:19] Unused
-Addresses [20:69] P3
-Addresses [70:79] Unused
+The request of P0 fail
 Exit
