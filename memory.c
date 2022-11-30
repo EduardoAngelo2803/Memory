@@ -1,19 +1,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define SIZE 1024
+#define SIZE 10240
 
-char* takeInput[SIZE];
-char* vetorMemory[SIZE];
-char* auxTake[SIZE];
-char* auxRelase [10];
+char *takeInput[SIZE];
+char *vetorMemory[SIZE];
+char *auxTake[SIZE];
+char *auxRelase[10];
 int countTake = 0;
 int countRequest = 0;
 int countProcess = 0;
 int tamTotal;
 int flagCountProcess;
 int countFirst = 0;
-
+int flagMemory;
+int countSpaces = 0;
+int auxFirst = 0;
+int flagFirst = 0, flagBest = 0, flagWorst = 0;
+int auxCountMemory = 0;
 FILE *f;
 
 typedef struct {
@@ -22,7 +26,6 @@ typedef struct {
     int num;
 
 } AlocMemory;
-
 
 typedef struct {
 
@@ -33,40 +36,89 @@ typedef struct {
 } Process;
 
 Process list[SIZE];
-
 AlocMemory allocation[SIZE];
 
-void firstFit () {
+void firstFit() {
 
     int auxCount = 0;
+    int i = 0;
+    int flag = 0;
+    int auxI = 0;
 
-      for (int i = 0; i < tamTotal; i++) {
+    while(i < tamTotal) {
 
-            if(allocation[i].num == 9999 && auxCount < list[countRequest].memory) {
-                //countFirst = verProcessNum(i);
+        if(allocation[i].num == 9999) {
+            auxI = i;
+            while (allocation[i].num == 9999) {
+
+                i++;
+                auxFirst++;
+            } 
+            
+            if(list[countRequest].memory <= auxFirst) {
+                
+                while(auxCount < list[countRequest].memory) {
+                    
+                    allocation[auxI].num = countFirst + 1;
+                    strcpy(allocation[auxI].name, list[countRequest].name);
+                    countFirst++;
+                    auxCount++;  
+                    auxI++;
+                }
+                flag = 1 ;
+
+            }
+            if(flag == 1) {
+                break;
+            }
+        }
+        i++;
+    }
+    if(flag == 0) {
+
+        flagFirst = 1;
+               
+    }
+     /*
+    for (i = 0; i < tamTotal; i++) {
+
+        if(list[countRequest].memory < auxFirst) {
+
+            if (allocation[i].num == 9999 && auxCount < list[countRequest].memory) {
+
+                // countFirst = verProcessNum(i);
                 allocation[i].num = countFirst + 1;
                 strcpy(allocation[i].name, list[countRequest].name);
-                //Flag to compact, add 1 without reset
                 countFirst++;
-                auxCount++;
-            }              
-        }       
-    for(int i = 0; i < tamTotal; i++) {
+                auxCount++;               
+            }
 
-        //printf("%s = %d\n", allocation[i].name, allocation[i].num);
+        }else {
 
-    } 
+            flagFirst = 1;
+            break;           
+        }
+    }*/
+
+    if(flagFirst != 1) {
+
+        auxCountMemory += list[countRequest].memory;
+    }   
+
+    auxFirst = 0;
 }
 
-void bestFit () {
+void bestFit() {
 
     int auxBestFit = 0;
     int auxContador;
     int auxCount = 0;
     int flag = 0;
     int menor = 9999;
+    int flagBestFit = 0;
     int auxMenor;
     auxMenor = menor;
+    int i = 0;
 
     for (int i = 0; i < tamTotal; i++) {
 
@@ -75,238 +127,244 @@ void bestFit () {
             flag = 1;
         }
     }
-
-    if(flag == 0) {
+   
+    if (flag == 0) {
 
         firstFit();
 
-    }else {
+    } else {
 
-        for (int i = 0; i < tamTotal; i++)
-        {
-
-            if(allocation[i].num == 9999) {
-                //Lock mutex
+        while(i < tamTotal) {
+            
+            if (allocation[i].num == 9999) {
+                // Lock mutex
                 auxBestFit = i;
-                while (allocation[i].num == 9999)
-                {
+
+                while (allocation[i].num == 9999) {
                     auxCount++;
                     i++;
                 }
+            
+                if (auxCount < menor && list[countRequest].memory <= auxCount) {
 
-                if(auxCount < menor) {
                     auxMenor = auxBestFit;
                     menor = auxCount;
+                    flagBestFit = 1;
                 }
-            }
-        }
-        
-        for (int i = auxMenor; i < list[countRequest].memory+auxMenor; i++)
-        {
 
-            if (allocation[i].num == 9999) {
-                // countFirst = verProcessNum(i);
-                allocation[i].num = countFirst + 1;
-                strcpy(allocation[i].name, list[countRequest].name);
-                // Flag to compact, add 1 without reset
-                countFirst++;
-                auxCount++;
             }else {
 
-                printf("Fail\n");
+                i++;
+            }
+            auxCount = 0;
+        }
+        if(flagBestFit == 0) {
+
+            flagBest = 1;
+
+        }else {
+
+            for (int i = auxMenor; i < list[countRequest].memory + auxMenor; i++) {
+
+                if (allocation[i].num == 9999) {
+                    
+                    allocation[i].num = countFirst + 1;
+                    strcpy(allocation[i].name, list[countRequest].name);
+                    // Flag to compact, add 1 without reset
+                    countFirst++;
+                    auxCount++;
+                }          
             }
         }
     }
 }
 
-void worstFit () {
-    /*
-    int auxBestFit = 0;
+void worstFit() {
+
+    int auxWorstFit = 0;
     int auxContador;
     int auxCount = 0;
     int flag = 0;
-    int maior = 9999;
+    int maior = 0;
+    int flagWorstFit = 0;
     int auxMaior;
     auxMaior = maior;
-    for (int i = 0; i < tamTotal; i++)
-    {
+    int i = 0;
 
-        if (allocation[i].num != 9999)
-        {
+    for (int i = 0; i < tamTotal; i++) {
+
+        if (allocation[i].num != 9999) {
 
             flag = 1;
         }
     }
-
-    if (flag == 0)
-    {
+   
+    if (flag == 0) {
 
         firstFit();
-    }
-    else
-    {
 
-        for (int i = 0; i < tamTotal; i++)
-        {
+    } else {
 
-            if (allocation[i].num == 9999)
-            {
+        while(i < tamTotal) {
+            
+            if (allocation[i].num == 9999) {
                 // Lock mutex
-                auxBestFit = i;
-                while (allocation[i].num == 9999)
-                {
+                auxWorstFit = i;
+
+                while (allocation[i].num == 9999) {
                     auxCount++;
                     i++;
                 }
+            
+                if (auxCount > maior && list[countRequest].memory <= auxCount) {
 
-                if (auxCount > maior)
-                {
-                    auxMaior = auxBestFit;
+                    auxMaior = auxWorstFit;
                     maior = auxCount;
+                    flagWorstFit = 1;
                 }
+
+            }else {
+
+                i++;
+            }
+            auxCount = 0;
+        }
+        if(flagWorstFit == 0) {
+
+            flagWorst = 1;
+
+        }else {
+
+            for (int i = auxMaior; i < list[countRequest].memory + auxMaior; i++) {
+
+                if (allocation[i].num == 9999) {
+                    
+                    allocation[i].num = countFirst + 1;
+                    strcpy(allocation[i].name, list[countRequest].name);
+                    // Flag to compact, add 1 without reset
+                    countFirst++;
+                    auxCount++;
+                }          
             }
         }
-    
-        for (int i = auxMaior; i < list[countRequest].memory + auxMaior; i++)
-        {
-
-            if (allocation[i].num == 9999)
-            {
-                // countFirst = verProcessNum(i);
-                allocation[i].num = countFirst + 1;
-                strcpy(allocation[i].name, list[countRequest].name);
-                // Flag to compact, add 1 without reset
-                countFirst++;
-                auxCount++;
-            }
-            else
-            {
-
-                printf("Fail\n");
-            }
-        }
-    }*/
+    }
 }
 
-void request () {
+void request() {
+
+    char aux[20];
+    sscanf(vetorMemory[countTake], "%s%s%d%s", aux, list[countRequest].name, &list[countRequest].memory, list[countRequest].strategy);
     
-    char aux[2];    
-    int auxFlag = 0;
-
-    sscanf(vetorMemory[countTake], "%s", aux);
-
+    memset(aux, 0, sizeof(char) * 2);
    
-
-    for(int i = 0; i < countProcess; i++) {
-
-       if(strcmp(aux, list[i].name) == 0) {
-
-            auxFlag = 1;
-
-       }
-
-    }
-    memset(aux, 0, sizeof(char) * 2);
-
-    if(auxFlag != 1) {
-
-        sscanf(vetorMemory[countTake], "%s%s%d%s", aux, list[countRequest].name, &list[countRequest].memory, list[countRequest].strategy);
-    }
-    memset(aux, 0, sizeof(char) * 2);
-
-    if(strcmp(list[countRequest].strategy, "F") == 0) {
+    if(list[countRequest].memory > tamTotal) {
         
-        if(list[countRequest].memory < tamTotal) {
+        fprintf(f, "The request of %s fail\n", list[countRequest].name);
+        list[countRequest].name[0] = '\0';
+        list[countRequest].memory = 0;
+        list[countRequest].strategy[0] = '\0';
+        flagCountProcess = 1;
+        
 
-            fprintf(f, "Allocate %d to %s with First fit\n", list[countRequest].memory, list[countRequest].name);
+    } else {
+
+        if (strcmp(list[countRequest].strategy, "F") == 0) {
+
             firstFit();
-        }else {
 
-            fprintf(f, "The request of %s fail\n", list[countRequest].name);
-            list[countRequest].name[0] = '\0';
-            list[countRequest].memory = 0;
-            list[countRequest].strategy[0] = '\0';
-            flagCountProcess = 1;
+            if (list[countRequest].memory < tamTotal && flagFirst != 1) {
 
-        }
-    }
-    else if (strcmp(list[countRequest].strategy, "B") == 0)
-    {
+                fprintf(f, "Allocate %d to %s with First Fit\n", list[countRequest].memory, list[countRequest].name);              
+                
+            }else {
+                
+                fprintf(f, "The request of %s fail\n", list[countRequest].name);
+                list[countRequest].name[0] = '\0';
+                list[countRequest].memory = 0;
+                list[countRequest].strategy[0] = '\0';
+                flagCountProcess = 1;
+            }
 
-       if(list[countRequest].memory < tamTotal) {
+        }else if (strcmp(list[countRequest].strategy, "B") == 0) {
 
-            fprintf(f, "Allocate %d to %s with Best fit\n", list[countRequest].memory, list[countRequest].name);
             bestFit();
-        }else {
 
-            fprintf(f, "The request of %s fail\n", list[countRequest].name);
-            list[countRequest].name[0] = '\0';
-            list[countRequest].memory = 0;
-            list[countRequest].strategy[0] = '\0';
-            flagCountProcess  = 1;
+            if (list[countRequest].memory < tamTotal && flagBest != 1) {
 
-        }
-    }
-    else if (strcmp(list[countRequest].strategy, "W") == 0)
-    {
+                fprintf(f, "Allocate %d to %s with Best Fit\n", list[countRequest].memory, list[countRequest].name);
+                
 
-        if(list[countRequest].memory < tamTotal) {
+            } else {
 
-            fprintf(f, "Allocate %d to %s with Worst fit\n", list[countRequest].memory, list[countRequest].name);
+                fprintf(f, "The request of %s fail\n", list[countRequest].name);
+                list[countRequest].name[0] = '\0';
+                list[countRequest].memory = 0;
+                list[countRequest].strategy[0] = '\0';
+                flagCountProcess = 1;
+            }
+
+        } else if (strcmp(list[countRequest].strategy, "W") == 0) {
+
             worstFit();
-        }else {
+           
+            if (list[countRequest].memory < tamTotal && flagWorst != 1) {
 
-            fprintf(f, "The request of %s fail\n", list[countRequest].name);
-            list[countRequest].name[0] = '\0';
-            list[countRequest].memory = 0;
-            list[countRequest].strategy[0] = '\0';
-            flagCountProcess = 1;
+                fprintf(f, "Allocate %d to %s with Worst Fit\n", list[countRequest].memory, list[countRequest].name);
+                
 
+            } else {
+
+                fprintf(f, "The request of %s fail\n", list[countRequest].name);
+                list[countRequest].name[0] = '\0';
+                list[countRequest].memory = 0;
+                list[countRequest].strategy[0] = '\0';
+                flagCountProcess = 1;
+            }
         }
     }
-
+    countSpaces = 0;
     countRequest++;
 }
 
-void release () {
-    
+void release() {
+
     int flagNoExist = 0;
 
-    for(int i = 0; i < countProcess; i++) {      
-        //Contando se o processo solicitado para release existe, na lista de processos, caso sim, acrescenta na flag, para depois verificar se existe algum ou não
-        if(strcmp(list[i].name, auxRelase[countTake]) != 0) {
+    for (int i = 0; i < countProcess; i++) {
+
+        // Contando se o processo solicitado para release existe, na lista de processos, caso sim, acrescenta na flag, para depois verificar se existe algum ou não
+        if (strcmp(list[i].name, auxRelase[countTake]) != 0) {
 
             flagNoExist++;
         }
     }
 
-    if(flagNoExist >= countProcess) {
-       
+    if (flagNoExist >= countProcess) {
+
         fprintf(f, "Fail to release %s\n", auxRelase[countTake]);
 
-    }else {
-       // printf("%d", flagNoExist);
+    } else {
+        // printf("%d", flagNoExist);
         fprintf(f, "Release %s\n", auxRelase[countTake]);
-        //countProcess--;
+        // countProcess--;
     }
-
 
     for (int i = 0; i < tamTotal; i++) {
 
-        if(allocation[i].num != 9999) {
+        if (allocation[i].num != 9999) {
 
             if (strcmp(allocation[i].name, auxRelase[countTake]) == 0) {
-               
+
                 strcpy(allocation[i].name, "Unused");
                 allocation[i].num = 9999;
             }
         }
-    }     
+    }
 
-    for(int i = 0; i < countProcess; i++) {
+    for (int i = 0; i < countProcess; i++) {
 
-         //Limpando o processo que sofreu release da lista de processos
-        if(strcmp(list[i].name, auxRelase[countTake]) == 0) {
+        // Limpando o processo que sofreu release da lista de processos
+        if (strcmp(list[i].name, auxRelase[countTake]) == 0) {
 
             list[i].name[0] = '\0';
             list[i].strategy[0] = '\0';
@@ -315,31 +373,45 @@ void release () {
     }
 }
 
-int verProcessName (int i) {
-   
-    for(int j = 0; j < countProcess; j++) {
+int verProcessName(int i) {
 
-        if(strcmp(allocation[i].name, list[j].name) == 0) {
-            
+    for (int j = 0; j < countProcess; j++) {
+
+        if (strcmp(allocation[i].name, list[j].name) == 0) {
+
             return j;
         }
     }
 }
 
-int verProcessNum (int i) {
+int verProcessNum(int i)
+{
 
-    for(int j = 0; j < countProcess; j++) {
+    for (int j = 0; j < countProcess; j++)
+    {
 
-        if(allocation[j].num == allocation[i].num) {
-            
+        if (allocation[j].num == allocation[i].num)
+        {
+
             return j;
         }
     }
-
 }
 
-void stat () {
-   
+void verSpaces() {
+
+    for (int i = 0; i < tamTotal; i++) {
+
+        if(allocation[i].num == 9999) {
+
+            countSpaces++;
+        }
+    }
+    
+}
+
+void stat() {
+
     int aux = 0;
     int auxUnused = 0;
     int flag = 0;
@@ -350,21 +422,19 @@ void stat () {
 
     while (i < tamTotal) {
 
-        if(allocation[i].num != 9999) {
-            //Lock 'Mutex'
+        if (allocation[i].num != 9999) {
+            // Lock 'Mutex'
             auxProcessName = verProcessName(i);
-            
+
             while (strcmp(allocation[i].name, list[auxProcessName].name) == 0) {
-                
+
                 i++;
                 auxi = i - 1;
-               
             }
 
             fprintf(f, "Addresses [%d:%d] %s\n", aux, auxi, allocation[auxi].name);
             aux = i;
-            
-  
+
         } else {
 
             auxUnused = i;
@@ -374,116 +444,86 @@ void stat () {
                 auxi = i - 1;
             }
             fprintf(f, "Addresses [%d:%d] Unused\n", aux, auxUnused - 1);
-            aux = i;           
+            aux = i;
         }
         flag++;
     }
- }
+}
 
-void compact () {
+void compact() {
 
-    int aux;
-    int flag = 0;
     int aux2;
-
-
-    int i, j, auxNum, auxDur, auxWait, auxexComp, auxlostDead, auxKilled, auxFlagKill;
+    int i, j, auxNum;
     char auxName[SIZE];
 
     for (i = 1; i < tamTotal; i++) {
 
         auxNum = allocation[i].num;
-        
         strcpy(auxName, allocation[i].name);
 
-        for (j = i - 1; j >= 0 && auxNum < allocation[j].num; j--)
-        {
+        for (j = i - 1; j >= 0 && auxNum < allocation[j].num; j--) {
 
             allocation[j + 1].num = allocation[j].num;
             strcpy(allocation[j + 1].name, allocation[j].name);
         }
 
-        allocation[j+1].num = auxNum;
+        allocation[j + 1].num = auxNum;
         strcpy(allocation[j + 1].name, auxName);
-       
     }
 
-
-
-    /*
-    for (int i = 0; i < tamTotal; i++) {   
-
-        if(flag == 1 && allocation[i].num != -1) {
-
-            for (int j = aux; j < i; j++) {
-
-                allocation[j].num = j;
-                strcpy(allocation[j].name, allocation[i].name);
-            }
-        }
-
-        if (allocation[i].num == -1) {
-
-            aux = i;
-            while (allocation[i].num == -1) {
-
-                i++;
-            }
-        }
-    }*/
     fprintf(f, "Compact Memory\n");
 }
 
-void end () {
-
-
+void end()
+{
 }
 
-void runMemory () {
+void runMemory() {
 
     char *ptr;
     int shouldrun = 1;
-
+  
     while (shouldrun == 1) {
 
-        if(strcmp(takeInput[countTake], "X") == 0) {
-            
+        if (strcmp(takeInput[countTake], "X") == 0) {
+
             fprintf(f, "Exit");
             exit(EXIT_SUCCESS);
         }
 
         ptr = strtok(takeInput[countTake], " ");
-        auxTake[countTake] = ptr;      
+        auxTake[countTake] = ptr;
 
-        if(strcmp(auxTake[countTake], "RQ") == 0) {
-            //Modificar
-            
-            countProcess++;            
+        if (strcmp(auxTake[countTake], "RQ") == 0) {
+            // Modificar
+
+            countProcess++;
             request();
 
         } else if (strcmp(auxTake[countTake], "RL") == 0) {
-            
+
             while (ptr != NULL) {
-                
+
                 auxRelase[countTake] = ptr;
                 ptr = strtok(NULL, " ");
-               
             }
+
             release();
 
         } else if (strcmp(auxTake[countTake], "STAT") == 0) {
-            
+
             stat();
 
         } else if (strcmp(auxTake[countTake], "C") == 0) {
-            
+
             compact();
         }
         countTake++;
     }
 }
 
-void initVetor() {
+void initVetor()
+{
 
     for (int i = 0; i < tamTotal; i++)
     {
@@ -491,57 +531,88 @@ void initVetor() {
         allocation[i].num = 9999;
     }
 }
-int main (int argc, char* argv[]) {
+
+int main(int argc, char *argv[]) {
 
     FILE *file;
+    char *auxCountLines[SIZE];
     int r = 0;
+    char *ptr;
+    char *str = {"X"};
+    int countLines = 0;
     f = fopen("memory_leam.out", "w");
 
-    if (argc <= 1)
-    {
+    if (argc <= 1) {
+
         printf("No Arguments entered! Exiting...\n");
         exit(0);
         file = fopen(argv[1], "r");
-    }
-    else if (argc == 2)
-    {
+
+    } else if (argc == 2) {
 
         printf("Problems with opening file!\n");
         exit(0);
-    }
-    else if (argc >= 3)
-    {
+
+    } else if (argc >= 3) {
+
         tamTotal = atoi(argv[1]);
-    
+
         file = fopen(argv[2], "r");
 
-        if(file == NULL) {
+        if (file == NULL) {
+
             printf("File no exist! Exiting...\n");
             exit(0);
         }
+
         while (!feof(file) && !ferror(file)) {
 
-            takeInput[r] = malloc(sizeof *takeInput[r] * 1024);        
-            fgets(takeInput[r], 1024, file);
-            printf("%d\n", strlen(takeInput[r]));   
-        
-            takeInput[r][strlen(takeInput[r]) - 1] = '\0';
-            r++;
+            auxCountLines[countLines] = malloc(sizeof *auxCountLines[countLines] * 1024);
+            fgets(auxCountLines[countLines], 1024, file);
+            countLines++;
         }
-    }
-    for (int i = 0; i < r - 1; i++) {
-
         
-        vetorMemory[i] =  strdup(takeInput[i]);
-        
-    }
-
         fclose(file);
 
+        file = fopen(argv[2], "r");
+
+        while (!feof(file) && !ferror(file)) {
+
+            takeInput[r] = malloc(sizeof *takeInput[r] * 1024);
+            fgets(takeInput[r], 1024, file);
+
+            if (r == (countLines - 1)) {
+                
+               if (strlen(takeInput[r]) > 1) {
+
+                   takeInput[r] = strtok(takeInput[r], " ");
+                  
+                }
+                r++;
+                break;
+
+            } else {
+
+                takeInput[r][strlen(takeInput[r]) - 1] = '\0';
+                r++;
+            }           
+        }       
+    }
+
+    for (int i = 0; i < r - 1; i++) {
+
+        if(strcmp(takeInput[i], "\0") != 0) {
+
+            vetorMemory[i] = strdup(takeInput[i]);
+            
+        }
+    }
+
+    fclose(file);
+    
     fprintf(f, "Total Memory %d\n", tamTotal);
     initVetor();
     runMemory();
-    
 
     return 0;
 }
