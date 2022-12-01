@@ -1,31 +1,13 @@
-Total Memory 1023
-Allocate 5 to P0 with Best Fit
-Allocate 10 to P1 with Best Fit
-Allocate 15 to P2 with Best Fit
-Addresses [0:4] P0
-Addresses [5:14] P1
-Addresses [15:29] P2
-Addresses [30:1022] Unused
+Total Memory 8000
+Allocate 1000 to P0 with Best Fit
+Allocate 5000 to P1 with Best Fit
+Allocate 2000 to P2 with Worst Fit
+The request of P3 fail
+The request of P0 fail
+The request of P1 fail
+The request of P2 fail
 Release P1
-Addresses [0:4] P0
-Addresses [5:14] Unused
-Addresses [15:29] P2
-Addresses [30:1022] Unused
-Allocate 5 to P0 with Worst Fit
-Addresses [0:4] P0
-Addresses [5:14] Unused
-Addresses [15:29] P2
-Addresses [30:34] P0
-Addresses [35:1022] Unused
+The request of T0 fail
+The request of T0 fail
 Compact Memory
-Addresses [0:4] P0
-Addresses [5:19] P2
-Addresses [20:24] P0
-Addresses [25:1022] Unused
-Fail to release P1
-Allocate 50 to P0 with Worst Fit
-Addresses [0:4] P0
-Addresses [5:19] P2
-Addresses [20:74] P0
-Addresses [75:1022] Unused
 Exit

@@ -47,9 +47,10 @@ void firstFit() {
 
     while(i < tamTotal) {
 
-        if(allocation[i].num == 9999) {
+        if(allocation[i].num == 99999) {
+            int auxAllocF = i;
             auxI = i;
-            while (allocation[i].num == 9999) {
+            while (allocation[i].num == 99999) {
 
                 i++;
                 auxFirst++;
@@ -59,11 +60,12 @@ void firstFit() {
                 
                 while(auxCount < list[countRequest].memory) {
                     
-                    allocation[auxI].num = countFirst + 1;
+                    allocation[auxI].num = auxAllocF + 1;
                     strcpy(allocation[auxI].name, list[countRequest].name);
                     countFirst++;
                     auxCount++;  
                     auxI++;
+                    auxAllocF++;
                 }
                 flag = 1 ;
 
@@ -79,32 +81,6 @@ void firstFit() {
         flagFirst = 1;
                
     }
-     /*
-    for (i = 0; i < tamTotal; i++) {
-
-        if(list[countRequest].memory < auxFirst) {
-
-            if (allocation[i].num == 9999 && auxCount < list[countRequest].memory) {
-
-                // countFirst = verProcessNum(i);
-                allocation[i].num = countFirst + 1;
-                strcpy(allocation[i].name, list[countRequest].name);
-                countFirst++;
-                auxCount++;               
-            }
-
-        }else {
-
-            flagFirst = 1;
-            break;           
-        }
-    }*/
-
-    if(flagFirst != 1) {
-
-        auxCountMemory += list[countRequest].memory;
-    }   
-
     auxFirst = 0;
 }
 
@@ -114,7 +90,7 @@ void bestFit() {
     int auxContador;
     int auxCount = 0;
     int flag = 0;
-    int menor = 9999;
+    int menor = 99999;
     int flagBestFit = 0;
     int auxMenor;
     auxMenor = menor;
@@ -122,7 +98,7 @@ void bestFit() {
 
     for (int i = 0; i < tamTotal; i++) {
 
-        if (allocation[i].num != 9999) {
+        if (allocation[i].num != 99999) {
 
             flag = 1;
         }
@@ -136,11 +112,11 @@ void bestFit() {
 
         while(i < tamTotal) {
             
-            if (allocation[i].num == 9999) {
+            if (allocation[i].num == 99999) {
                 // Lock mutex
                 auxBestFit = i;
 
-                while (allocation[i].num == 9999) {
+                while (allocation[i].num == 99999) {
                     auxCount++;
                     i++;
                 }
@@ -163,20 +139,22 @@ void bestFit() {
             flagBest = 1;
 
         }else {
-
+            int auxAllocB = auxMenor;
             for (int i = auxMenor; i < list[countRequest].memory + auxMenor; i++) {
 
-                if (allocation[i].num == 9999) {
+                if (allocation[i].num == 99999) {
                     
-                    allocation[i].num = countFirst + 1;
+                    allocation[i].num = auxAllocB + 1;
                     strcpy(allocation[i].name, list[countRequest].name);
                     // Flag to compact, add 1 without reset
                     countFirst++;
                     auxCount++;
+                    auxAllocB++;
                 }          
             }
         }
     }
+     
 }
 
 void worstFit() {
@@ -193,7 +171,7 @@ void worstFit() {
 
     for (int i = 0; i < tamTotal; i++) {
 
-        if (allocation[i].num != 9999) {
+        if (allocation[i].num != 99999) {
 
             flag = 1;
         }
@@ -207,11 +185,11 @@ void worstFit() {
 
         while(i < tamTotal) {
             
-            if (allocation[i].num == 9999) {
+            if (allocation[i].num == 99999) {
                 // Lock mutex
                 auxWorstFit = i;
 
-                while (allocation[i].num == 9999) {
+                while (allocation[i].num == 99999) {
                     auxCount++;
                     i++;
                 }
@@ -234,16 +212,17 @@ void worstFit() {
             flagWorst = 1;
 
         }else {
-
+            int auxAllocW = auxMaior;
             for (int i = auxMaior; i < list[countRequest].memory + auxMaior; i++) {
 
-                if (allocation[i].num == 9999) {
+                if (allocation[i].num == 99999) {
                     
-                    allocation[i].num = countFirst + 1;
+                    allocation[i].num = auxAllocW + 1;
                     strcpy(allocation[i].name, list[countRequest].name);
                     // Flag to compact, add 1 without reset
                     countFirst++;
                     auxCount++;
+                    auxAllocW++;
                 }          
             }
         }
@@ -274,7 +253,9 @@ void request() {
 
             if (list[countRequest].memory < tamTotal && flagFirst != 1) {
 
-                fprintf(f, "Allocate %d to %s with First Fit\n", list[countRequest].memory, list[countRequest].name);              
+                fprintf(f, "Allocate %d to %s with First Fit\n", list[countRequest].memory, list[countRequest].name);       
+                auxCountMemory += list[countRequest].memory;
+           
                 
             }else {
                 
@@ -292,7 +273,7 @@ void request() {
             if (list[countRequest].memory < tamTotal && flagBest != 1) {
 
                 fprintf(f, "Allocate %d to %s with Best Fit\n", list[countRequest].memory, list[countRequest].name);
-                
+                auxCountMemory += list[countRequest].memory;
 
             } else {
 
@@ -310,7 +291,7 @@ void request() {
             if (list[countRequest].memory < tamTotal && flagWorst != 1) {
 
                 fprintf(f, "Allocate %d to %s with Worst Fit\n", list[countRequest].memory, list[countRequest].name);
-                
+                auxCountMemory += list[countRequest].memory;
 
             } else {
 
@@ -344,19 +325,19 @@ void release() {
         fprintf(f, "Fail to release %s\n", auxRelase[countTake]);
 
     } else {
-        // printf("%d", flagNoExist);
+       
         fprintf(f, "Release %s\n", auxRelase[countTake]);
-        // countProcess--;
+        
     }
 
     for (int i = 0; i < tamTotal; i++) {
 
-        if (allocation[i].num != 9999) {
+        if (allocation[i].num != 99999) {
 
             if (strcmp(allocation[i].name, auxRelase[countTake]) == 0) {
 
                 strcpy(allocation[i].name, "Unused");
-                allocation[i].num = 9999;
+                allocation[i].num = 99999;
             }
         }
     }
@@ -365,7 +346,6 @@ void release() {
 
         // Limpando o processo que sofreu release da lista de processos
         if (strcmp(list[i].name, auxRelase[countTake]) == 0) {
-
             list[i].name[0] = '\0';
             list[i].strategy[0] = '\0';
             list[i].memory = 0;
@@ -402,7 +382,7 @@ void verSpaces() {
 
     for (int i = 0; i < tamTotal; i++) {
 
-        if(allocation[i].num == 9999) {
+        if(allocation[i].num == 99999) {
 
             countSpaces++;
         }
@@ -422,7 +402,7 @@ void stat() {
 
     while (i < tamTotal) {
 
-        if (allocation[i].num != 9999) {
+        if (allocation[i].num != 99999) {
             // Lock 'Mutex'
             auxProcessName = verProcessName(i);
 
@@ -438,7 +418,7 @@ void stat() {
         } else {
 
             auxUnused = i;
-            while (allocation[i].num == 9999) {
+            while (allocation[i].num == 99999) {
                 auxUnused++;
                 i++;
                 auxi = i - 1;
@@ -455,14 +435,14 @@ void compact() {
     int aux2;
     int i, j, auxNum;
     char auxName[SIZE];
-
+    
     for (i = 1; i < tamTotal; i++) {
 
         auxNum = allocation[i].num;
         strcpy(auxName, allocation[i].name);
 
         for (j = i - 1; j >= 0 && auxNum < allocation[j].num; j--) {
-
+            
             allocation[j + 1].num = allocation[j].num;
             strcpy(allocation[j + 1].name, allocation[j].name);
         }
@@ -470,6 +450,20 @@ void compact() {
         allocation[j + 1].num = auxNum;
         strcpy(allocation[j + 1].name, auxName);
     }
+    /*
+    for(i = 0; i < tamTotal; i++) {
+
+        auxNum = allocation[i].num;
+        strcpy(auxName, allocation[i].name);
+
+        if(allocation[i].num == 99999) {
+
+
+
+        }
+
+
+    }*/
 
     fprintf(f, "Compact Memory\n");
 }
@@ -522,13 +516,11 @@ void runMemory() {
     }
 }
 
-void initVetor()
-{
+void initVetor() {
 
-    for (int i = 0; i < tamTotal; i++)
-    {
+    for (int i = 0; i < tamTotal; i++) {
 
-        allocation[i].num = 9999;
+        allocation[i].num = 99999;
     }
 }
 
