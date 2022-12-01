@@ -254,6 +254,7 @@ void request() {
             if (list[countRequest].memory < tamTotal && flagFirst != 1) {
 
                 fprintf(f, "Allocate %d to %s with First Fit\n", list[countRequest].memory, list[countRequest].name);       
+                countProcess++;
                 auxCountMemory += list[countRequest].memory;
            
                 
@@ -273,6 +274,7 @@ void request() {
             if (list[countRequest].memory < tamTotal && flagBest != 1) {
 
                 fprintf(f, "Allocate %d to %s with Best Fit\n", list[countRequest].memory, list[countRequest].name);
+                countProcess++;
                 auxCountMemory += list[countRequest].memory;
 
             } else {
@@ -291,6 +293,7 @@ void request() {
             if (list[countRequest].memory < tamTotal && flagWorst != 1) {
 
                 fprintf(f, "Allocate %d to %s with Worst Fit\n", list[countRequest].memory, list[countRequest].name);
+                countProcess++;
                 auxCountMemory += list[countRequest].memory;
 
             } else {
@@ -327,7 +330,7 @@ void release() {
     } else {
        
         fprintf(f, "Release %s\n", auxRelase[countTake]);
-        
+        auxCountMemory -= list[countTake].memory;
     }
 
     for (int i = 0; i < tamTotal; i++) {
@@ -386,8 +389,7 @@ void verSpaces() {
 
             countSpaces++;
         }
-    }
-    
+    }    
 }
 
 void stat() {
@@ -398,9 +400,10 @@ void stat() {
     int i = 0;
     int j = 0;
     int auxi = 0;
+    int auxflagStat = 0;
     int auxProcessName;
 
-    while (i < tamTotal) {
+    while (i < tamTotal && flag < 99) {
 
         if (allocation[i].num != 99999) {
             // Lock 'Mutex'
@@ -409,11 +412,12 @@ void stat() {
             while (strcmp(allocation[i].name, list[auxProcessName].name) == 0) {
 
                 i++;
-                auxi = i - 1;
+                auxflagStat = 1;
             }
-
+            auxi = i - 1;
             fprintf(f, "Addresses [%d:%d] %s\n", aux, auxi, allocation[auxi].name);
             aux = i;
+            
 
         } else {
 
@@ -422,11 +426,17 @@ void stat() {
                 auxUnused++;
                 i++;
                 auxi = i - 1;
+                auxflagStat = 1;
             }
             fprintf(f, "Addresses [%d:%d] Unused\n", aux, auxUnused - 1);
             aux = i;
+            
         }
         flag++;
+        if(auxflagStat != 1) {
+            i++;
+        }
+        auxflagStat = 0;
     }
 }
 
@@ -450,20 +460,6 @@ void compact() {
         allocation[j + 1].num = auxNum;
         strcpy(allocation[j + 1].name, auxName);
     }
-    /*
-    for(i = 0; i < tamTotal; i++) {
-
-        auxNum = allocation[i].num;
-        strcpy(auxName, allocation[i].name);
-
-        if(allocation[i].num == 99999) {
-
-
-
-        }
-
-
-    }*/
 
     fprintf(f, "Compact Memory\n");
 }
@@ -489,9 +485,7 @@ void runMemory() {
         auxTake[countTake] = ptr;
 
         if (strcmp(auxTake[countTake], "RQ") == 0) {
-            // Modificar
-
-            countProcess++;
+            
             request();
 
         } else if (strcmp(auxTake[countTake], "RL") == 0) {
@@ -532,6 +526,7 @@ int main(int argc, char *argv[]) {
     char *ptr;
     char *str = {"X"};
     int countLines = 0;
+    int t;
     f = fopen("memory_leam.out", "w");
 
     if (argc <= 1) {
@@ -542,10 +537,30 @@ int main(int argc, char *argv[]) {
 
     } else if (argc == 2) {
 
-        printf("Problems with opening file!\n");
+        if(sscanf(argv[1], "%d", &t) != 1) {
+
+            printf("Input an Integer before ./memory!\n");
+
+        }else {
+
+            printf("Problems with opening file!\n");
+        }
+        
         exit(0);
 
-    } else if (argc >= 3) {
+    } else if  (argc > 3) {
+
+        printf("Many arguments entered! Please input only 3!\n");
+        exit(0);
+
+    }else if (argc == 3) {
+
+        if(sscanf(argv[1], "%d", &t) != 1) {
+
+            printf("Please input an Integer before ./memory!\n");
+            exit(0);
+
+        }
 
         tamTotal = atoi(argv[1]);
 
